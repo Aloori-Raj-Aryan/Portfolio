@@ -1,0 +1,5 @@
+Photo: intro_photo.JPEG
+
+Aloori Raj Aryan is an AI Engineer at Flam, Bengaluru, India, working at the intersection of computer vision, augmented reality, and generative AI. He holds a degree in Electrical Engineering from the Indian Institute of Technology (IIT) BHU. His research interests lie in geometric computer vision, visual SLAM, 3D reconstruction, and learning-based generative models, with a focus on mathematically grounded and computationally efficient approaches.
+ 
+His work emphasizes the integration of classical vision principles with modern deep learning techniques to design robust, real-time systems. He is particularly interested in bridging the gap between theoretical formulations and practical deployment, developing scalable algorithms and architectures for resource-constrained and real-world environments. His broader expertise spans applied mathematics, optimization, data science, and high-performance AI systems.

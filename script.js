@@ -67,8 +67,6 @@ function splitParagraphs(text) {
     .filter(Boolean);
 }
 
-const PROJECTS_INDEX_URL = "./assets/projects/projects.json";
-
 function splitMarkdownParagraphs(text) {
   return splitParagraphs(text.replace(/\s*\n\s*/g, "\n")).map((paragraph) =>
     paragraph.replace(/^#+\s*/, "").trim(),
@@ -117,36 +115,6 @@ async function discoverProjectFolders() {
   }
 }
 
-async function loadProjectItems() {
-  const items = [];
-
-  try {
-    const res = await fetch(PROJECTS_INDEX_URL, { cache: "no-store" });
-    if (res.ok) {
-      const json = await res.json();
-      if (Array.isArray(json)) items.push(...json);
-    }
-  } catch (_e) {
-    // ignore malformed or missing manifest
-  }
-
-  const discovered = await discoverProjectFolders();
-  const knownSlugs = new Set(
-    items
-      .map((raw) => String(raw.slug || raw.id || raw.name || "").trim())
-      .filter(Boolean),
-  );
-
-  for (const slug of discovered) {
-    if (!knownSlugs.has(slug)) {
-      items.push({ slug });
-      knownSlugs.add(slug);
-    }
-  }
-
-  return items;
-}
-
 async function fetchTextResource(url) {
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -155,6 +123,29 @@ async function fetchTextResource(url) {
   } catch (_e) {
     return null;
   }
+}
+
+async function loadProjectItems() {
+  // Try manifest first — works on all servers including ones that
+  // don't serve directory listings (GitHub Pages, Netlify, Vercel, etc.)
+  const manifest = await fetchTextResource("./assets/projects/projects.json");
+  if (manifest) {
+    try {
+      const parsed = JSON.parse(manifest);
+      // Accept either ["slug1", "slug2"] or [{slug: "slug1", title: "..."}, ...]
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) =>
+          typeof item === "string" ? { slug: item } : item
+        );
+      }
+    } catch (_) {
+      // JSON parse failed — fall through to directory discovery
+    }
+  }
+
+  // Fallback: try directory listing (only works on some local dev servers)
+  const discovered = await discoverProjectFolders();
+  return discovered.map((slug) => ({ slug }));
 }
 
 function parseProjectMarkdown(raw) {
@@ -183,24 +174,12 @@ function createProjectCard(project) {
   const card = document.createElement("article");
   card.className = "card project-card";
 
-  if (project.video) {
-    const video = document.createElement("video");
-    video.controls = true;
-    video.preload = "metadata";
-    video.playsInline = true;
-    if (project.poster) {
-      video.poster = project.poster;
-    }
-    video.src = project.video;
-    video.textContent = "Your browser does not support the video tag.";
-    card.appendChild(video);
-    video.load();
-  } else if (project.image) {
+  if (project.image) {
     const img = document.createElement("img");
     img.src = project.image;
-    img.alt = project.title ? `${project.title} image` : "Project image";
+    img.alt = project.title ? `${project.title} thumbnail` : "Project thumbnail";
     img.onerror = function () {
-      this.src = "https://placehold.co/600x360/232a3c/ffffff?text=Project+Image";
+      this.src = "https://placehold.co/600x360/232a3c/ffffff?text=Project+Thumbnail";
     };
     card.appendChild(img);
   }
@@ -216,6 +195,26 @@ function createProjectCard(project) {
     body.appendChild(paragraph);
   }
   card.appendChild(body);
+
+  if (project.video) {
+    const videoBody = document.createElement("div");
+    videoBody.className = "card-body";
+    const subtitle = document.createElement("h3");
+    subtitle.textContent = "Demo Video";
+    videoBody.appendChild(subtitle);
+    const video = document.createElement("video");
+    video.controls = true;
+    video.preload = "metadata";
+    video.playsInline = true;
+    if (project.poster) {
+      video.poster = project.poster;
+    }
+    video.src = project.video;
+    video.textContent = "Your browser does not support the video tag.";
+    videoBody.appendChild(video);
+    video.load();
+    card.appendChild(videoBody);
+  }
 
   if (project.links?.length) {
     const linksBody = document.createElement("div");
@@ -240,12 +239,9 @@ async function loadProjectsSection() {
   if (!grid || !errEl) return;
 
   try {
-    const res = await fetch(PROJECTS_INDEX_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error("projects manifest missing");
-
     const items = await loadProjectItems();
-    if (!Array.isArray(items)) {
-      throw new Error("invalid projects manifest");
+    if (!Array.isArray(items) || items.length === 0) {
+      throw new Error("no projects found");
     }
 
     grid.innerHTML = "";
@@ -256,7 +252,10 @@ async function loadProjectsSection() {
       let title = raw.title || humanizeProjectSlug(slug);
       let description = raw.description || "";
       const image = buildProjectUrl(root, raw.image || "image.png");
-      const video = raw.video === undefined ? buildProjectUrl(root, "video.mp4") : buildProjectUrl(root, raw.video);
+      const video =
+        raw.video === undefined
+          ? buildProjectUrl(root, "video.mp4")
+          : buildProjectUrl(root, raw.video);
 
       if (!description) {
         const introText = await fetchTextResource(`${root}/intro.md`);
@@ -291,7 +290,7 @@ async function loadProjectsSection() {
     grid.innerHTML = "";
     errEl.classList.remove("hidden");
     errEl.textContent =
-      "Could not load projects. Make sure assets/projects/projects.json exists and points to project folders.";
+      "Could not load projects. Make sure assets/projects/projects.json exists and lists your project folder names.";
     console.error(error);
   }
 }
