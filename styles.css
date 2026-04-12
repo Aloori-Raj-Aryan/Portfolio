@@ -112,6 +112,8 @@ body {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  height: 100vh;
+  overflow: hidden;
 }
 
 ::selection {
@@ -145,7 +147,7 @@ a {
 }
 
 main > section:first-child {
-  padding-top: clamp(48px, 7vw, 72px);
+  padding-top: clamp(24px, 3vw, 36px);
 }
 
 .site-header {
@@ -343,7 +345,7 @@ main > section:first-child {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
   gap: clamp(28px, 4vw, 48px);
-  align-items: start;
+  align-items: center;
 }
 
 .intro-photo {
@@ -370,6 +372,7 @@ main > section:first-child {
 .intro-copy {
   min-width: 0;
   padding-top: 4px;
+  text-align: center;
 }
 
 .intro-copy .section-text {
