@@ -166,23 +166,16 @@ function createProjectCard(project) {
   card.appendChild(body);
 
   if (project.video) {
-    const videoBody = document.createElement("div");
-    videoBody.className = "card-body";
-    const subtitle = document.createElement("h3");
-    subtitle.textContent = "Demo Video";
-    videoBody.appendChild(subtitle);
-    const video = document.createElement("video");
-    video.controls = true;
-    video.preload = "metadata";
-    video.playsInline = true;
-    if (project.poster) {
-      video.poster = project.poster;
-    }
-    video.src = project.video;
-    video.textContent = "Your browser does not support the video tag.";
-    videoBody.appendChild(video);
-    video.load();
-    card.appendChild(videoBody);
+    const linksBody = document.createElement("div");
+    linksBody.className = "card-body";
+    const demoLink = document.createElement("a");
+    demoLink.href = project.video;
+    demoLink.target = "_blank";
+    demoLink.rel = "noreferrer";
+    demoLink.textContent = "Watch Demo";
+    demoLink.style.fontWeight = "500";
+    linksBody.appendChild(demoLink);
+    card.appendChild(linksBody);
   }
 
   if (project.links?.length) {
