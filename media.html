@@ -3,11 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aloori Raj Aryan | Introduction</title>
-    <meta
-      name="description"
-      content="Introduction — Aloori Raj Aryan portfolio."
-    />
+    <title>Media | Aloori Raj Aryan</title>
+    <meta name="description" content="Featured media — Aloori Raj Aryan portfolio." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -36,9 +33,9 @@
       <div class="container nav-wrap">
         <a class="brand" href="./index.html">Aloori Raj Aryan</a>
         <nav class="nav">
-          <a href="./index.html" aria-current="page">Introduction</a>
+          <a href="./index.html">Introduction</a>
           <a href="./projects.html">Projects</a>
-          <a href="./media.html">Media</a>
+          <a href="./media.html" aria-current="page">Media</a>
           <a href="./contact.html">Contact</a>
         </nav>
         <div class="header-end">
@@ -63,16 +60,19 @@
       </div>
     </header>
 
-    <main id="home" class="page-home">
-      <section id="introduction" class="section">
-        <div class="container intro-split">
-          <div class="intro-photo card image-card">
-            <img id="intro-hero-image" src="" alt="" />
-          </div>
-          <div class="intro-copy">
-            <h2>Introduction</h2>
-            <div id="introduction-body" class="intro-body section-text"></div>
-            <p id="introduction-error" class="section-text hidden" role="alert"></p>
+    <main>
+      <section id="media" class="section">
+        <div class="container">
+          <h2>Featured Video</h2>
+          <p class="section-text">
+            Place your showcase video in <code>assets/videos/</code> and update
+            the file name below.
+          </p>
+          <div class="card video-card">
+            <video controls preload="metadata" poster="./assets/images/video-poster.jpg">
+              <source src="./assets/videos/showreel-placeholder.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           </div>
         </div>
       </section>

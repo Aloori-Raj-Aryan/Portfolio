@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projects | Aloori Raj Aryan</title>
+    <meta name="description" content="Projects — Aloori Raj Aryan portfolio." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script>
+      (function () {
+        try {
+          var k = "portfolio-theme";
+          var s = localStorage.getItem(k);
+          if (s === "light" || s === "dark") {
+            document.documentElement.setAttribute("data-theme", s);
+          } else {
+            document.documentElement.setAttribute("data-theme", "light");
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="./index.html">Aloori Raj Aryan</a>
+        <nav class="nav">
+          <a href="./index.html">Introduction</a>
+          <a href="./projects.html" aria-current="page">Projects</a>
+          <a href="./media.html">Media</a>
+          <a href="./contact.html">Contact</a>
+        </nav>
+        <div class="header-end">
+          <label class="theme-switch">
+            <span class="theme-switch__label">Night</span>
+            <span class="theme-switch__wrap">
+              <input
+                type="checkbox"
+                class="theme-switch__input"
+                id="theme-switch-input"
+                role="switch"
+                aria-checked="false"
+                aria-label="Night mode"
+              />
+              <span class="theme-switch__track" aria-hidden="true">
+                <span class="theme-switch__thumb"></span>
+              </span>
+            </span>
+          </label>
+          <button class="menu-btn" aria-label="Toggle menu">Menu</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="projects" class="section">
+        <div class="container">
+          <h2>Projects</h2>
+          <div class="cards-grid">
+            <article class="card project-card">
+              <img
+                src="./assets/images/project-1.jpg"
+                alt="Project 1 placeholder"
+                onerror="this.src='https://placehold.co/600x360/232a3c/ffffff?text=Project+Image+1';"
+              />
+              <div class="card-body">
+                <h3>Project One</h3>
+                <p>
+                  Short explanation placeholder: what it does, who it’s for, and
+                  what makes it interesting.
+                </p>
+              </div>
+              <div class="card-body">
+                <h3>Demo Video</h3>
+                <video
+                  controls
+                  preload="metadata"
+                  poster="./assets/images/project-1-poster.jpg"
+                >
+                  <source
+                    src="./assets/videos/project-1-demo.mp4"
+                    type="video/mp4"
+                  />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div class="card-body">
+                <a href="#" target="_blank" rel="noreferrer">Live Demo</a>
+                &nbsp;·&nbsp;
+                <a href="#" target="_blank" rel="noreferrer">Source Code</a>
+              </div>
+            </article>
+
+            <article class="card project-card">
+              <img
+                src="./assets/images/project-2.jpg"
+                alt="Project 2 placeholder"
+                onerror="this.src='https://placehold.co/600x360/2f2443/ffffff?text=Project+Image+2';"
+              />
+              <div class="card-body">
+                <h3>Project Two</h3>
+                <p>
+                  Short explanation placeholder: your goal, key feature, and the
+                  main challenge you solved.
+                </p>
+              </div>
+              <div class="card-body">
+                <h3>Demo Video</h3>
+                <video
+                  controls
+                  preload="metadata"
+                  poster="./assets/images/project-2-poster.jpg"
+                >
+                  <source
+                    src="./assets/videos/project-2-demo.mp4"
+                    type="video/mp4"
+                  />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div class="card-body">
+                <a href="#" target="_blank" rel="noreferrer">Case Study</a>
+                &nbsp;·&nbsp;
+                <a href="#" target="_blank" rel="noreferrer">Live Demo</a>
+              </div>
+            </article>
+
+            <article class="card project-card">
+              <img
+                src="./assets/images/project-3.jpg"
+                alt="Project 3 placeholder"
+                onerror="this.src='https://placehold.co/600x360/1e3a30/ffffff?text=Project+Image+3';"
+              />
+              <div class="card-body">
+                <h3>Project Three</h3>
+                <p>
+                  Short explanation placeholder: what you built, your role, and
+                  the impact/result.
+                </p>
+              </div>
+              <div class="card-body">
+                <h3>Demo Video</h3>
+                <video
+                  controls
+                  preload="metadata"
+                  poster="./assets/images/project-3-poster.jpg"
+                >
+                  <source
+                    src="./assets/videos/project-3-demo.mp4"
+                    type="video/mp4"
+                  />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div class="card-body">
+                <a href="#" target="_blank" rel="noreferrer">GitHub Repo</a>
+                &nbsp;·&nbsp;
+                <a href="#" target="_blank" rel="noreferrer">Live Demo</a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

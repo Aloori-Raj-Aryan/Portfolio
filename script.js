@@ -130,4 +130,6 @@ async function loadIntroAssets() {
   }
 }
 
-loadIntroAssets();
+if (document.getElementById("introduction-body")) {
+  loadIntroAssets();
+}
