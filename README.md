@@ -9,6 +9,7 @@ A clean, one-page portfolio template with placeholders for images and videos.
 - `script.js` - mobile menu toggle and footer year
 - `assets/images/` - put your images here
 - `assets/videos/` - put your videos here
+- `assets/projects/` - project folders used by the dynamic projects section
 
 ## Run Locally
 
@@ -35,7 +36,12 @@ Then open: <http://localhost:8000>
    - `assets/images/video-poster.jpg`
 5. Add your showcase video:
    - `assets/videos/showreel-placeholder.mp4`
-6. Update project and contact links in the Projects and Contact sections
+6. Add dynamic project folders under `assets/projects/`:
+   - Each project gets a folder, e.g. `assets/projects/AI_image_tracking/`
+   - Use `intro.md` for title and description
+   - Add `image.png` for the card image
+   - Add `video.mp4` for an optional demo video
+   - Update `assets/projects/projects.json` with each folder slug
 
 ## Customize Quickly
 
