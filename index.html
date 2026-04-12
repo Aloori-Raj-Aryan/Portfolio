@@ -15,6 +15,21 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
+    <script>
+      (function () {
+        try {
+          var k = "portfolio-theme";
+          var s = localStorage.getItem(k);
+          if (s === "light" || s === "dark") {
+            document.documentElement.setAttribute("data-theme", s);
+          } else {
+            document.documentElement.setAttribute("data-theme", "light");
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+      })();
+    </script>
   </head>
   <body>
     <header class="site-header">
@@ -26,70 +41,48 @@
           <a href="#media">Media</a>
           <a href="#contact">Contact</a>
         </nav>
-        <button class="menu-btn" aria-label="Toggle menu">Menu</button>
+        <div class="header-end">
+          <label class="theme-switch">
+            <span class="theme-switch__label">Night</span>
+            <span class="theme-switch__wrap">
+              <input
+                type="checkbox"
+                class="theme-switch__input"
+                id="theme-switch-input"
+                role="switch"
+                aria-checked="false"
+                aria-label="Night mode"
+              />
+              <span class="theme-switch__track" aria-hidden="true">
+                <span class="theme-switch__thumb"></span>
+              </span>
+            </span>
+          </label>
+          <button class="menu-btn" aria-label="Toggle menu">Menu</button>
+        </div>
       </div>
     </header>
 
     <main id="home">
-      <section class="hero section">
-        <div class="container hero-grid">
-          <div>
-            <!-- <p class="kicker">Portfolio Website</p> -->
-            <h1>Aloori Raj Aryan.</h1>
-            <p class="lead">
-              Add your 1–2 line intro here (role, what you build, and what you’re
-              currently focused on).
-            </p>
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="#projects">View Projects</a>
-              <a class="btn btn-ghost" href="#contact">Contact Me</a>
-            </div>
-          </div>
-          <div class="card image-card">
-            <img
-              src="./assets/images/profile-placeholder.jpg"
-              alt="Profile placeholder"
-              onerror="this.src='https://placehold.co/700x500/1b1f2a/ffffff?text=Your+Profile+Photo';"
-            />
+      <!-- <section class="hero section">
+        <div class="container hero-inner">
+          <h1>Aloori Raj Aryan.</h1>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#projects">View Projects</a>
+            <a class="btn btn-ghost" href="#contact">Contact Me</a>
           </div>
         </div>
-      </section>
+      </section> -->
 
       <section id="introduction" class="section">
-        <div class="container">
-          <h2>Introduction</h2>
-          <p class="section-text">
-            Write a short paragraph about you: what you do, what you’re learning,
-            and what kinds of projects you love building.
-          </p>
-          <div class="cards-grid">
-            <article class="card">
-              <div class="card-body">
-                <h3>What I do</h3>
-                <p>
-                  Placeholder: web apps, mobile apps, UI/UX, backend APIs,
-                  automation, etc.
-                </p>
-              </div>
-            </article>
-            <article class="card">
-              <div class="card-body">
-                <h3>Tech I use</h3>
-                <p>
-                  Placeholder: HTML/CSS/JS, React, Node, Python, Git, Figma,
-                  etc.
-                </p>
-              </div>
-            </article>
-            <article class="card">
-              <div class="card-body">
-                <h3>Currently</h3>
-                <p>
-                  Placeholder: building a new app, learning a framework,
-                  preparing for internships, freelancing, etc.
-                </p>
-              </div>
-            </article>
+        <div class="container intro-split">
+          <div class="intro-photo card image-card">
+            <img id="intro-hero-image" src="" alt="" />
+          </div>
+          <div class="intro-copy">
+            <h2>Introduction</h2>
+            <div id="introduction-body" class="intro-body section-text"></div>
+            <p id="introduction-error" class="section-text hidden" role="alert"></p>
           </div>
         </div>
       </section>
