@@ -156,7 +156,17 @@ function createProjectCard(project) {
   const body = document.createElement("div");
   body.className = "card-body";
   const heading = document.createElement("h3");
+  heading.className = "project-title";
   heading.textContent = project.title;
+  if (project.video) {
+    const demoLink = document.createElement("a");
+    demoLink.className = "watch-demo-link";
+    demoLink.href = project.video;
+    demoLink.target = "_blank";
+    demoLink.rel = "noreferrer";
+    demoLink.textContent = "Watch Demo";
+    heading.appendChild(demoLink);
+  }
   body.appendChild(heading);
   if (project.description) {
     const paragraph = document.createElement("p");
@@ -164,19 +174,6 @@ function createProjectCard(project) {
     body.appendChild(paragraph);
   }
   card.appendChild(body);
-
-  if (project.video) {
-    const linksBody = document.createElement("div");
-    linksBody.className = "card-body";
-    const demoLink = document.createElement("a");
-    demoLink.href = project.video;
-    demoLink.target = "_blank";
-    demoLink.rel = "noreferrer";
-    demoLink.textContent = "Watch Demo";
-    demoLink.style.fontWeight = "500";
-    linksBody.appendChild(demoLink);
-    card.appendChild(linksBody);
-  }
 
   if (project.links?.length) {
     const linksBody = document.createElement("div");
