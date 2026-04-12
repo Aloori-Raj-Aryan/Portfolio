@@ -93,6 +93,60 @@ function buildProjectUrl(root, value) {
   return `${root}/${value}`;
 }
 
+async function discoverProjectFolders() {
+  try {
+    const res = await fetch("./assets/projects/", { cache: "no-store" });
+    if (!res.ok) return [];
+
+    const html = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const slugs = [];
+    doc.querySelectorAll("a[href]").forEach((anchor) => {
+      const href = anchor.getAttribute("href");
+      if (!href || href === "../" || href === "/") return;
+      if (!href.endsWith("/")) return;
+      const slug = href.replace(/\/+$/, "").trim();
+      if (slug && !slugs.includes(slug)) {
+        slugs.push(slug);
+      }
+    });
+    return slugs;
+  } catch (_e) {
+    return [];
+  }
+}
+
+async function loadProjectItems() {
+  const items = [];
+
+  try {
+    const res = await fetch(PROJECTS_INDEX_URL, { cache: "no-store" });
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json)) items.push(...json);
+    }
+  } catch (_e) {
+    // ignore malformed or missing manifest
+  }
+
+  const discovered = await discoverProjectFolders();
+  const knownSlugs = new Set(
+    items
+      .map((raw) => String(raw.slug || raw.id || raw.name || "").trim())
+      .filter(Boolean),
+  );
+
+  for (const slug of discovered) {
+    if (!knownSlugs.has(slug)) {
+      items.push({ slug });
+      knownSlugs.add(slug);
+    }
+  }
+
+  return items;
+}
+
 async function fetchTextResource(url) {
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -129,7 +183,19 @@ function createProjectCard(project) {
   const card = document.createElement("article");
   card.className = "card project-card";
 
-  if (project.image) {
+  if (project.video) {
+    const video = document.createElement("video");
+    video.controls = true;
+    video.preload = "metadata";
+    video.playsInline = true;
+    if (project.poster) {
+      video.poster = project.poster;
+    }
+    video.src = project.video;
+    video.textContent = "Your browser does not support the video tag.";
+    card.appendChild(video);
+    video.load();
+  } else if (project.image) {
     const img = document.createElement("img");
     img.src = project.image;
     img.alt = project.title ? `${project.title} image` : "Project image";
@@ -150,24 +216,6 @@ function createProjectCard(project) {
     body.appendChild(paragraph);
   }
   card.appendChild(body);
-
-  if (project.video) {
-    const videoBody = document.createElement("div");
-    videoBody.className = "card-body";
-    const subtitle = document.createElement("h3");
-    subtitle.textContent = "Demo Video";
-    videoBody.appendChild(subtitle);
-    const video = document.createElement("video");
-    video.controls = true;
-    video.preload = "metadata";
-    const source = document.createElement("source");
-    source.src = project.video;
-    source.type = "video/mp4";
-    video.appendChild(source);
-    video.textContent = "Your browser does not support the video tag.";
-    videoBody.appendChild(video);
-    card.appendChild(videoBody);
-  }
 
   if (project.links?.length) {
     const linksBody = document.createElement("div");
@@ -195,7 +243,7 @@ async function loadProjectsSection() {
     const res = await fetch(PROJECTS_INDEX_URL, { cache: "no-store" });
     if (!res.ok) throw new Error("projects manifest missing");
 
-    const items = await res.json();
+    const items = await loadProjectItems();
     if (!Array.isArray(items)) {
       throw new Error("invalid projects manifest");
     }
