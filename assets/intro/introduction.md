@@ -1,9 +1,5 @@
 Photo: intro_photo.JPEG
 
-I am an AI Engineer at Flam, based in Bengaluru, India, working at the intersection of computer vision, augmented reality, and generative AI. I hold a degree in Electrical Engineering from the Indian Institute of Technology (IIT) BHU.
+I love building intelligent systems and pushing the boundaries of AI. Currently working as an AI Engineer, I previously worked as a Data Scientist, which strengthened my foundation in data-driven problem solving and machine learning.
 
-My core interests lie in geometric computer vision, visual SLAM, 3D reconstruction, and learning-based generative models, with a strong emphasis on mathematically grounded and computationally efficient approaches.
-
-I focus on combining classical vision principles with modern deep learning techniques to build robust, real-time systems. My work is driven by the goal of bridging the gap between theoretical formulations and practical deployment—designing scalable algorithms and architectures that perform reliably in resource-constrained, real-world environments.
-
-Beyond this, I have experience across applied mathematics, optimization, data science, and high-performance AI systems.
+My work spans computer vision, augmented reality, and generative models, with a strong focus on real-world, scalable solutions. Beyond tech, I’ve been actively involved in dramatics, which has shaped my creativity, storytelling, and ability to think beyond conventional approaches.
