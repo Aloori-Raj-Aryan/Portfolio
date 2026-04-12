@@ -41,7 +41,6 @@ Then open: <http://localhost:8000>
    - Use `intro.md` for title and description
    - Add `image.png` for the card image
    - Add `video.mp4` for an optional demo video
-   - Update `assets/projects/projects.json` with each folder slug
 
 ## Customize Quickly
 

@@ -57,6 +57,7 @@ if (menuButton && nav) {
 }
 
 const INTRO_URL = "./assets/intro/introduction.md";
+const PROJECTS_INDEX_URL = "./assets/projects/projects.json";
 
 function splitParagraphs(text) {
   const normalized = text.replace(/\r\n/g, "\n").trim();
@@ -91,30 +92,6 @@ function buildProjectUrl(root, value) {
   return `${root}/${value}`;
 }
 
-async function discoverProjectFolders() {
-  try {
-    const res = await fetch("./assets/projects/", { cache: "no-store" });
-    if (!res.ok) return [];
-
-    const html = await res.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    const slugs = [];
-    doc.querySelectorAll("a[href]").forEach((anchor) => {
-      const href = anchor.getAttribute("href");
-      if (!href || href === "../" || href === "/") return;
-      if (!href.endsWith("/")) return;
-      const slug = href.replace(/\/+$/, "").trim();
-      if (slug && !slugs.includes(slug)) {
-        slugs.push(slug);
-      }
-    });
-    return slugs;
-  } catch (_e) {
-    return [];
-  }
-}
-
 async function fetchTextResource(url) {
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -126,26 +103,18 @@ async function fetchTextResource(url) {
 }
 
 async function loadProjectItems() {
-  // Try manifest first — works on all servers including ones that
-  // don't serve directory listings (GitHub Pages, Netlify, Vercel, etc.)
-  const manifest = await fetchTextResource("./assets/projects/projects.json");
-  if (manifest) {
-    try {
-      const parsed = JSON.parse(manifest);
-      // Accept either ["slug1", "slug2"] or [{slug: "slug1", title: "..."}, ...]
-      if (Array.isArray(parsed)) {
-        return parsed.map((item) =>
-          typeof item === "string" ? { slug: item } : item
-        );
-      }
-    } catch (_) {
-      // JSON parse failed — fall through to directory discovery
-    }
-  }
+  const manifest = await fetchTextResource(PROJECTS_INDEX_URL);
+  if (!manifest) return [];
 
-  // Fallback: try directory listing (only works on some local dev servers)
-  const discovered = await discoverProjectFolders();
-  return discovered.map((slug) => ({ slug }));
+  try {
+    const parsed = JSON.parse(manifest);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) =>
+      typeof item === "string" ? { slug: item } : item,
+    );
+  } catch (_e) {
+    return [];
+  }
 }
 
 function parseProjectMarkdown(raw) {
@@ -290,7 +259,7 @@ async function loadProjectsSection() {
     grid.innerHTML = "";
     errEl.classList.remove("hidden");
     errEl.textContent =
-      "Could not load projects. Make sure assets/projects/projects.json exists and lists your project folder names.";
+      "Could not load projects. Make sure project folders exist under assets/projects/.";
     console.error(error);
   }
 }
@@ -342,8 +311,22 @@ async function loadIntroAssets() {
     }
 
     if (imgEl && photoName) {
-      imgEl.src = `./assets/intro/${encodeURIComponent(photoName)}`;
+      const originalPhoto = `./assets/intro/${encodeURIComponent(photoName)}`;
+      const fallbackPhoto = photoName.replace(/\.[^.]+$/, (ext) => ext.toLowerCase());
+      const fallbackUrl = fallbackPhoto === photoName
+        ? null
+        : `./assets/intro/${encodeURIComponent(fallbackPhoto)}`;
+
       imgEl.alt = "Profile photo";
+      imgEl.src = originalPhoto;
+      imgEl.onerror = function () {
+        if (fallbackUrl && this.src !== fallbackUrl) {
+          this.onerror = null;
+          this.src = fallbackUrl;
+          return;
+        }
+        this.src = "https://placehold.co/600x360/232a3c/ffffff?text=Profile+Photo";
+      };
     }
 
     if (splitEl) {
