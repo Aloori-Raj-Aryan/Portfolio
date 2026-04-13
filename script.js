@@ -102,6 +102,15 @@ async function fetchTextResource(url) {
   }
 }
 
+async function resourceExists(url) {
+  try {
+    const res = await fetch(url, { method: "HEAD", cache: "no-store" });
+    return res.ok;
+  } catch (_e) {
+    return false;
+  }
+}
+
 async function loadProjectItems() {
   const manifest = await fetchTextResource(PROJECTS_INDEX_URL);
   if (!manifest) return [];
@@ -211,10 +220,15 @@ async function loadProjectsSection() {
       let title = raw.title || humanizeProjectSlug(slug);
       let description = raw.description || "";
       const image = buildProjectUrl(root, raw.image || "image.png");
-      const video =
-        raw.video === undefined
-          ? buildProjectUrl(root, "video.mp4")
-          : buildProjectUrl(root, raw.video);
+      let video = null;
+      if (raw.video !== undefined) {
+        video = buildProjectUrl(root, raw.video);
+      } else {
+        const videoUrl = buildProjectUrl(root, "video.mp4");
+        if (await resourceExists(videoUrl)) {
+          video = videoUrl;
+        }
+      }
 
       if (!description) {
         const introText = await fetchTextResource(`${root}/intro.md`);
