@@ -59,6 +59,9 @@ if (menuButton && nav) {
 const INTRO_URL = "./assets/intro/introduction.md";
 const PROJECTS_INDEX_URL = "./assets/projects/projects.json";
 
+// Common image extensions to probe when no explicit image is declared
+const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp", "gif", "avif", "svg"];
+
 function splitParagraphs(text) {
   const normalized = text.replace(/\r\n/g, "\n").trim();
   if (!normalized) return [];
@@ -111,6 +114,55 @@ async function resourceExists(url) {
   }
 }
 
+/**
+ * Probe a folder for the first image file that exists.
+ * If `explicit` is provided (from projects.json), only that URL is checked.
+ * Otherwise, common filenames + extensions are tried in order.
+ * Returns the URL string if found, or null.
+ */
+async function resolveProjectImage(root, explicit) {
+  if (explicit !== undefined && explicit !== null) {
+    // Caller supplied an explicit value (may be empty string meaning "none")
+    if (!explicit) return null;
+    const url = buildProjectUrl(root, explicit);
+    return (await resourceExists(url)) ? url : null;
+  }
+
+  // No explicit value — probe common names across all supported extensions
+  const names = ["image", "thumbnail", "cover", "preview", "photo"];
+  for (const name of names) {
+    for (const ext of IMAGE_EXTENSIONS) {
+      const url = `${root}/${name}.${ext}`;
+      if (await resourceExists(url)) return url;
+    }
+  }
+  return null;
+}
+
+/**
+ * Probe a folder for the first video file that exists.
+ * If `explicit` is provided (from projects.json), only that URL is checked.
+ * Otherwise, common filenames + extensions are tried in order.
+ * Returns the URL string if found, or null.
+ */
+async function resolveProjectVideo(root, explicit) {
+  if (explicit !== undefined && explicit !== null) {
+    if (!explicit) return null;
+    const url = buildProjectUrl(root, explicit);
+    return (await resourceExists(url)) ? url : null;
+  }
+
+  const videoExts = ["mp4", "webm", "mov", "ogg"];
+  const names = ["video", "demo", "preview"];
+  for (const name of names) {
+    for (const ext of videoExts) {
+      const url = `${root}/${name}.${ext}`;
+      if (await resourceExists(url)) return url;
+    }
+  }
+  return null;
+}
+
 async function loadProjectItems() {
   const manifest = await fetchTextResource(PROJECTS_INDEX_URL);
   if (!manifest) return [];
@@ -152,21 +204,29 @@ function createProjectCard(project) {
   const card = document.createElement("article");
   card.className = "card project-card";
 
+  // ── Image: only rendered when an image file was confirmed to exist ──
   if (project.image) {
     const img = document.createElement("img");
     img.src = project.image;
-    img.alt = project.title ? `${project.title} thumbnail` : "Project thumbnail";
+    img.alt = project.title
+      ? `${project.title} thumbnail`
+      : "Project thumbnail";
     img.onerror = function () {
-      this.src = "https://placehold.co/600x360/232a3c/ffffff?text=Project+Thumbnail";
+      // Hide the broken image rather than showing a placeholder,
+      // since we already confirmed the file exists via HEAD request.
+      this.style.display = "none";
     };
     card.appendChild(img);
   }
 
   const body = document.createElement("div");
   body.className = "card-body";
+
   const heading = document.createElement("h3");
   heading.className = "project-title";
   heading.textContent = project.title;
+
+  // ── Watch Demo button: only rendered when a video file was confirmed to exist ──
   if (project.video) {
     const demoLink = document.createElement("a");
     demoLink.className = "watch-demo-link";
@@ -176,12 +236,16 @@ function createProjectCard(project) {
     demoLink.textContent = "Watch Demo";
     heading.appendChild(demoLink);
   }
+
   body.appendChild(heading);
+
+  // ── Description: only rendered when intro.md text was found ──
   if (project.description) {
     const paragraph = document.createElement("p");
     paragraph.textContent = project.description;
     body.appendChild(paragraph);
   }
+
   card.appendChild(body);
 
   if (project.links?.length) {
@@ -213,23 +277,30 @@ async function loadProjectsSection() {
     }
 
     grid.innerHTML = "";
+
     for (const raw of items) {
       const slug = String(raw.slug || raw.id || raw.name || "").trim();
       if (!slug) continue;
+
       const root = `./assets/projects/${encodeURIComponent(slug)}`;
       let title = raw.title || humanizeProjectSlug(slug);
       let description = raw.description || "";
-      const image = buildProjectUrl(root, raw.image || "image.png");
-      let video = null;
-      if (raw.video !== undefined) {
-        video = buildProjectUrl(root, raw.video);
-      } else {
-        const videoUrl = buildProjectUrl(root, "video.mp4");
-        if (await resourceExists(videoUrl)) {
-          video = videoUrl;
-        }
-      }
 
+      // ── Resolve image: check if a real file exists ──
+      // Pass `raw.image` if declared in JSON (even if ""), otherwise undefined
+      // so the auto-probe kicks in.
+      const image = await resolveProjectImage(
+        root,
+        "image" in raw ? raw.image : undefined,
+      );
+
+      // ── Resolve video: same pattern ──
+      const video = await resolveProjectVideo(
+        root,
+        "video" in raw ? raw.video : undefined,
+      );
+
+      // ── Load description from intro.md only if not already supplied ──
       if (!description) {
         const introText = await fetchTextResource(`${root}/intro.md`);
         if (introText) {
@@ -237,16 +308,15 @@ async function loadProjectsSection() {
           if (parsed.title) title = parsed.title;
           description = parsed.description;
         }
+        // If intro.md is missing or empty, description stays "" and is not rendered
       }
 
-      const poster = buildProjectUrl(root, raw.poster || raw.image || "image.png");
       const project = {
         root,
         title,
-        description,
-        image,
-        poster,
-        video,
+        description, // empty string → no <p> rendered
+        image,       // null → no <img> rendered
+        video,       // null → no Watch Demo button rendered
         links: Array.isArray(raw.links) ? raw.links : [],
       };
 
@@ -316,10 +386,13 @@ async function loadIntroAssets() {
 
     if (imgEl && photoName) {
       const originalPhoto = `./assets/intro/${encodeURIComponent(photoName)}`;
-      const fallbackPhoto = photoName.replace(/\.[^.]+$/, (ext) => ext.toLowerCase());
-      const fallbackUrl = fallbackPhoto === photoName
-        ? null
-        : `./assets/intro/${encodeURIComponent(fallbackPhoto)}`;
+      const fallbackPhoto = photoName.replace(/\.[^.]+$/, (ext) =>
+        ext.toLowerCase(),
+      );
+      const fallbackUrl =
+        fallbackPhoto === photoName
+          ? null
+          : `./assets/intro/${encodeURIComponent(fallbackPhoto)}`;
 
       imgEl.alt = "Profile photo";
       imgEl.src = originalPhoto;
@@ -329,7 +402,8 @@ async function loadIntroAssets() {
           this.src = fallbackUrl;
           return;
         }
-        this.src = "https://placehold.co/600x360/232a3c/ffffff?text=Profile+Photo";
+        this.src =
+          "https://placehold.co/600x360/232a3c/ffffff?text=Profile+Photo";
       };
     }
 
