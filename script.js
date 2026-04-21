@@ -279,48 +279,53 @@ async function loadProjectsSection() {
     grid.innerHTML = "";
 
     for (const raw of items) {
-      const slug = String(raw.slug || raw.id || raw.name || "").trim();
-      if (!slug) continue;
+      try {
+        const slug = String(raw.slug || raw.id || raw.name || "").trim();
+        if (!slug) continue;
 
-      const root = `./assets/projects/${encodeURIComponent(slug)}`;
-      let title = raw.title || humanizeProjectSlug(slug);
-      let description = raw.description || "";
+        const root = `./assets/projects/${encodeURIComponent(slug)}`;
+        let title = raw.title || humanizeProjectSlug(slug);
+        let description = raw.description || "";
 
-      // ── Resolve image: check if a real file exists ──
-      // Pass `raw.image` if declared in JSON (even if ""), otherwise undefined
-      // so the auto-probe kicks in.
-      const image = await resolveProjectImage(
-        root,
-        "image" in raw ? raw.image : undefined,
-      );
+        // ── Resolve image: check if a real file exists ──
+        // Pass `raw.image` if declared in JSON (even if ""), otherwise undefined
+        // so the auto-probe kicks in.
+        const image = await resolveProjectImage(
+          root,
+          "image" in raw ? raw.image : undefined,
+        );
 
-      // ── Resolve video: same pattern ──
-      const video = await resolveProjectVideo(
-        root,
-        "video" in raw ? raw.video : undefined,
-      );
+        // ── Resolve video: same pattern ──
+        const video = await resolveProjectVideo(
+          root,
+          "video" in raw ? raw.video : undefined,
+        );
 
-      // ── Load description from intro.md only if not already supplied ──
-      if (!description) {
-        const introText = await fetchTextResource(`${root}/intro.md`);
-        if (introText) {
-          const parsed = parseProjectMarkdown(introText);
-          if (parsed.title) title = parsed.title;
-          description = parsed.description;
+        // ── Load description from intro.md only if not already supplied ──
+        if (!description) {
+          const introText = await fetchTextResource(`${root}/intro.md`);
+          if (introText) {
+            const parsed = parseProjectMarkdown(introText);
+            if (parsed.title) title = parsed.title;
+            description = parsed.description;
+          }
+          // If intro.md is missing or empty, description stays "" and is not rendered
         }
-        // If intro.md is missing or empty, description stays "" and is not rendered
+
+        const project = {
+          root,
+          title,
+          description, // empty string → no <p> rendered
+          image,       // null → no <img> rendered
+          video,       // null → no Watch Demo button rendered
+          links: Array.isArray(raw.links) ? raw.links : [],
+        };
+
+        grid.appendChild(createProjectCard(project));
+      } catch (projectError) {
+        // Skip individual project if it fails to load
+        console.warn(`Skipping project due to error:`, projectError);
       }
-
-      const project = {
-        root,
-        title,
-        description, // empty string → no <p> rendered
-        image,       // null → no <img> rendered
-        video,       // null → no Watch Demo button rendered
-        links: Array.isArray(raw.links) ? raw.links : [],
-      };
-
-      grid.appendChild(createProjectCard(project));
     }
 
     if (!grid.children.length) {

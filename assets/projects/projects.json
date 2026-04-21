@@ -1,5 +1,8 @@
 [
     "AI_image_tracking",
-    "EV_disintegration",
     "Image_Tracking",
-]
+    "Object_tracking",
+    "Multi_view_3D_reconstruction",
+    "Single_view_3D_reconstruction",
+    "EV_disintegration"
+    ]
